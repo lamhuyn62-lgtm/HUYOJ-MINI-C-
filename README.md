@@ -15,8 +15,9 @@ Hệ thống quản lý và chấm bài tập lập trình trực tuyến tối 
 Thực hiện theo các bước sau để chạy hệ thống trên máy tính của bạn:
 
 ### 1. Clone repository hoặc tải về
-Tải mã nguồn trực tiếp bằng cách bấm nút **`<> Code` -> Download ZIP** ở trang chính GitHub, sau đó giải nén ra thư mục làm việc. Hoặc sử dụng Git qua terminal:
-Tải mã nguồn và chạy:
 ```bash
 git clone https://github.com/lamhuyn62-lgtm/HUYOJ-MINI-C-.git
+
+### 2. Chạy
+```bash
 python app.py
