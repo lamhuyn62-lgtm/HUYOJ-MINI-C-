@@ -16,12 +16,12 @@ Thực hiện theo các bước sau để chạy hệ thống trên máy tính c
 
 ### 1. Clone repository hoặc tải về
 Tải mã nguồn trực tiếp bằng cách bấm nút **`<> Code` -> Download ZIP** ở trang chính GitHub, sau đó giải nén ra thư mục làm việc. Hoặc sử dụng Git qua terminal:
-```bash
 Tải mã nguồn:
-git clone https://github.com/lamhuyn62-lgtm/HUYOJ-MINI-C-.git
-
 ```bash
-Chạy
+git clone https://github.com/lamhuyn62-lgtm/HUYOJ-MINI-C-.git
+_______________________________________________________________________________
+Chạy:
+```bash
 python app.py
 
 
