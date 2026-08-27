@@ -15,6 +15,18 @@ Hệ thống quản lý và chấm bài tập lập trình trực tuyến tối 
 Thực hiện theo các bước sau để chạy hệ thống trên máy tính của bạn:
 
 ### 1. Clone repository hoặc tải về và chạy hệ thống
-```bash
 git clone https://github.com/lamhuyn62-lgtm/HUYOJ-MINI-C-.git
 python app.py
+
+### 2. Thiết lập môi trường ảo Python (Khuyên dùng)
+Tạo và kích hoạt môi trường ảo để quản lý thư viện gọn gàng:
+
+# Trên macOS / Linux:
+python3 -m venv venv
+source venv/bin/activate
+# Trên Windows:
+python -m venv venv
+venv\Scripts\activate
+### 3. Cài đặt các thư viện phụ thuộc
+# Hệ thống sử dụng Flask làm nền tảng web backend. Cài đặt Flask bằng lệnh:
+pip install Flask
