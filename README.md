@@ -5,7 +5,7 @@ Hệ thống quản lý và chấm bài tập lập trình trực tuyến tối 
 ---
 
 ## 📋 Tính năng chính
-* **Hỗ trợ đa ngôn ngữ:** Cho phép nộp và chấm tự động mã nguồn C++.
+* **Hỗ trợ ngôn ngữ:** Cho phép nộp và chấm tự động mã nguồn C++.
 * **Hệ thống chấm tự động:** Kiểm tra kết quả trực tiếp với các bộ test mẫu (Sample Test) và trả về trạng thái chuẩn xác như *Accepted (AC)*, *Wrong Answer (WA)*, *Compilation Error*...
 
 ---
@@ -21,11 +21,11 @@ Tạo và kích hoạt môi trường ảo để quản lý thư viện gọn g�
 ### Trên macOS / Linux:
 python3 -m venv venv
 source venv/bin/activate
-# Trên Windows:
+### Trên Windows:
 python -m venv venv
 venv\Scripts\activate
 ### 3. Cài đặt các thư viện phụ thuộc
-# Hệ thống sử dụng Flask làm nền tảng web backend. Cài đặt Flask bằng lệnh:
+### Hệ thống sử dụng Flask làm nền tảng web backend. Cài đặt Flask bằng lệnh:
 pip install Flask
 ### Khởi động
 python app.py
