@@ -23,13 +23,3 @@ _______________________________________________________________________________
 Chạy:
 ```bash
 python app.py
-
-
-<img width="1917" height="876" alt="image" src="https://github.com/user-attachments/assets/bcc537c0-af43-458c-8882-ecd9b13a978e" />
-<img width="1845" height="842" alt="image" src="https://github.com/user-attachments/assets/092a6ec2-c78f-4fd9-9f19-499fe1ee97de" />
-<img width="1863" height="843" alt="image" src="https://github.com/user-attachments/assets/97b9bcb4-e29e-42b1-9319-5f251c2b492c" />
-<img width="1827" height="786" alt="image" src="https://github.com/user-attachments/assets/95c2b1d7-c56d-4300-af2d-560cfb3eb653" />
-
-
-
-
