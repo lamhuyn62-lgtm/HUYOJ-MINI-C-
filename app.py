@@ -75,10 +75,10 @@ problems_db = [
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>HuyOJ - Online Judge Mini </title>
+    <title>HuyOJ - Quản Lý & Chấm Bài C++</title>
     <style>
         :root {
             --bg-color: #1e1e1e; --panel-bg: #252526; --text-color: #d4d4d4;
@@ -315,15 +315,15 @@ HTML_TEMPLATE = """
 </div>
 
 <script>
-let currentTheme = localStorage.getItem('siteTheme') || 'dark';
-document.documentElement.setAttribute('data-theme', currentTheme);
+    let currentTheme = 'dark';
+    let currentLang = 'vi';
+    let currentId = 1;
+    let problems = [];
 
-let currentLang = localStorage.getItem('siteLang') || 'vi';
-let currentId = parseInt(localStorage.getItem('currentId')) || 1;
-let problems = [];
+    // LẤY DỮ LIỆU LỊCH SỬ VÀ CODE ĐÃ LƯU TRỮ TỪ BỘ NHỚ TRÌNH DUYỆT (GIỮ LẠI KHI F5)
+    let allLogs = JSON.parse(localStorage.getItem('submissionLogs')) || [];
+    let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
 
-let allLogs = JSON.parse(localStorage.getItem('submissionLogs')) || [];
-let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
     const i18n = {
         vi: {
             sysTitle: "Hệ Thống Chấm Bài C++",
@@ -333,7 +333,7 @@ let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
             tabHistory: "Lịch sử Chấm",
             themeBtn: "Sáng/Tối",
             loading: "Đang tải dữ liệu...",
-            selectProbPrompt: "Luyện Tập ",
+            selectProbPrompt: "Chọn một bài tập bên trái",
             selectProbDesc: "Vui lòng chọn bài tập để xem đề bài chi tiết, input/output mẫu.",
             sampleInTitle: "Ví dụ Input mẫu:",
             sampleOutTitle: "Ví dụ Output mẫu:",
@@ -411,11 +411,10 @@ let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
         }
     };
 
-   function toggleLanguage() {
-    currentLang = currentLang === 'vi' ? 'en' : 'vi';
-    localStorage.setItem('siteLang', currentLang);
-    updateTexts();
-}
+    function toggleLanguage() {
+        currentLang = currentLang === 'vi' ? 'en' : 'vi';
+        updateTexts();
+    }
 
     function updateTexts() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -501,11 +500,9 @@ for n in range(1, 11):
         document.documentElement.setAttribute('data-theme', currentTheme);
     }
 
-  function toggleTheme() {
-    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    localStorage.setItem('siteTheme', currentTheme);
-   }
+    function switchMainTab(tabKey) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         
         if (tabKey === 'list') {
             document.getElementById('content-list').classList.add('active');
@@ -575,18 +572,15 @@ for n in range(1, 11):
         }
     }
 
-document.addEventListener("DOMContentLoaded", () => {
-    updateTexts(); // Tự động dịch lại ngôn ngữ khi F5
-
-    const textarea = document.getElementById('code-textarea');
-    if (textarea) {
-        textarea.addEventListener('input', () => {
-            codeStorage[currentId] = textarea.value;
-            localStorage.setItem('codeStorage', JSON.stringify(codeStorage));
-        });
-    }
-    fetchProblems();
-});
+    // Tự động lưu code vào localStorage khi người dùng gõ phím
+    document.addEventListener("DOMContentLoaded", () => {
+        const textarea = document.getElementById('code-textarea');
+        if (textarea) {
+            textarea.addEventListener('input', () => {
+                codeStorage[currentId] = textarea.value;
+                localStorage.setItem('codeStorage', JSON.stringify(codeStorage));
+            });
+        }
         fetchProblems();
     });
 
