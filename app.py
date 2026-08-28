@@ -176,7 +176,7 @@ HTML_TEMPLATE = """
                         <div class="io-box" id="d-sample-in"></div>
                         <h4 data-i18n="sampleOutTitle">Ví dụ Output mẫu:</h4>
                         <div class="io-box" id="d-sample-out"></div>
-                        <button class="submit-btn" style="margin-top: 10px;" onclick="goToIde()">✍️ <span data-i18n="writeCodeBtn">Viết code giải bài này</span></button>
+                        <button class="submit-btn" style="margin-top: 10px;" onclick="goToIde(currentId)">✍️ Nạp Bài</button>
                     </div>
                 </div>
             </div>
@@ -192,7 +192,7 @@ HTML_TEMPLATE = """
                     <span id="ide-prob-title" style="margin-left: 15px; font-weight: bold; color: #4ec9b0; font-size: 15px;"></span>
                 </div>
                 <div>
-                    <button class="submit-btn" onclick="submitCode()">🚀 <span data-i18n="submitBtn">Nộp bài C++</span></button>
+                    <button class="submit-btn" style="margin-top: 10px;" onclick="goToIde(currentId)">✍️ Viết code giải bài này</button>
                 </div>
             </div>
             
@@ -545,19 +545,44 @@ for n in range(1, 11):
         switchMainTab('list');
     }
 
-    function goToIde() {
-        const p = problems.find(x => x.id === currentId);
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.getElementById('content-ide').classList.add('active');
-        document.getElementById('ide-prob-title').innerHTML = p.name;
-        document.getElementById('summary').innerText = "";
-        document.getElementById('test-results-list').innerHTML = "";
+    // 1. Khai báo bộ nhớ đệm lưu code riêng theo ID bài tập (đặt ngoài hàm)
+let codeStorage = {};
 
-        const textarea = document.getElementById('code-textarea');
-        if (!textarea.value.trim()) {
-            textarea.value = `#include <iostream>\\nusing namespace std;\\n\\nint main() {\\n    \\n    return 0;\\n}`;
-        }
+function goToIde(probId) {
+    // Nếu có truyền vào ID mới thì cập nhật currentId
+    if (probId !== undefined) {
+        currentId = probId;
     }
+    
+    const p = problems.find(x => x.id === currentId);
+    if (!p) return;
+
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('content-ide').classList.add('active');
+    document.getElementById('ide-prob-title').innerHTML = p.name;
+    document.getElementById('summary').innerText = "";
+    document.getElementById('test-results-list').innerHTML = "";
+
+    const textarea = document.getElementById('code-textarea');
+    
+    // 2. Nạp code riêng của bài hiện tại từ kho lưu trữ
+    if (codeStorage[currentId] !== undefined) {
+        textarea.value = codeStorage[currentId];
+    } else {
+        // Nếu bài này chưa có code thì hiển thị khung mặc định
+        textarea.value = `#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}`;
+    }
+}
+
+// 3. Tự động lưu lại code vào kho mỗi khi người dùng gõ phím
+document.addEventListener("DOMContentLoaded", () => {
+    const textarea = document.getElementById('code-textarea');
+    if (textarea) {
+        textarea.addEventListener('input', () => {
+            codeStorage[currentId] = textarea.value;
+        });
+    }
+});
 
     async function addNewProblem() {
         let name = document.getElementById('new-name').value.trim();
