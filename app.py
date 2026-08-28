@@ -6,6 +6,8 @@ from datetime import datetime
 from flask import Flask, render_template_string, request, jsonify
 
 app = Flask(__name__)
+# Lưu ý: global_submissions ở đây chỉ dùng như bộ đệm phụ, 
+# lịch sử chính sẽ được client đồng bộ và lưu trữ an toàn vào localStorage của trình duyệt.
 global_submissions = []
 
 problems_db = [
@@ -154,7 +156,6 @@ HTML_TEMPLATE = """
             <button class="tab-btn" id="btn-tab-admin-manage" onclick="switchMainTab('admin-manage')">⚙️ <span data-i18n="tabManage">Quản lý & Sửa bài</span></button>
             <button class="tab-btn" id="btn-tab-admin" onclick="switchMainTab('admin')">🛡️ <span data-i18n="tabHistory">Lịch sử Chấm</span></button>
         </div>
-        <!-- Đã tách ra 4 nút điều khiển riêng biệt -->
         <div class="controls">
             <button class="ctrl-btn" id="btn-lang" onclick="toggleLanguage()">🌐 VN / EN</button>
             <button class="ctrl-btn" id="btn-theme" onclick="toggleTheme()">☀️ <span data-i18n="themeBtn">Sáng/Tối</span></button>
@@ -176,7 +177,7 @@ HTML_TEMPLATE = """
                         <div class="io-box" id="d-sample-in"></div>
                         <h4 data-i18n="sampleOutTitle">Ví dụ Output mẫu:</h4>
                         <div class="io-box" id="d-sample-out"></div>
-                        <button class="submit-btn" style="margin-top: 10px;" onclick="goToIde(currentId)">✍️ Nạp Bài</button>
+                        <button class="submit-btn" style="margin-top: 10px;" onclick="goToIde(currentId)"><span data-i18n="writeCodeBtn">Viết code giải bài này</span></button>
                     </div>
                 </div>
             </div>
@@ -300,7 +301,7 @@ HTML_TEMPLATE = """
             </tbody>
         </table>
 
-        <!-- Khung xem chi tiết bài nộp trong Lịch sử (Bài nào ra bài nấy, độc lập hoàn toàn) -->
+        <!-- Khung xem chi tiết bài nộp trong Lịch sử -->
         <div id="submission-detail-container" style="margin-top: 25px; display: none;" class="problem-card">
             <h3 style="color: #4ec9b0; margin-top: 0;" data-i18n="subDetailHeader">📄 Chi tiết bài nộp đã chọn</h3>
             <div class="form-group">
@@ -314,12 +315,14 @@ HTML_TEMPLATE = """
 </div>
 
 <script>
-    // Mặc định luôn là 'light' (Sáng) và 'vi' (Tiếng Việt) và khôi phục từ localStorage nếu có
-    let currentTheme = localStorage.getItem('theme') || 'light';
-    let currentLang = localStorage.getItem('language') || 'vi';
+    let currentTheme = 'dark';
+    let currentLang = 'vi';
     let currentId = 1;
     let problems = [];
-    let allLogs = [];
+
+    // LẤY DỮ LIỆU LỊCH SỬ VÀ CODE ĐÃ LƯU TRỮ TỪ BỘ NHỚ TRÌNH DUYỆT (GIỮ LẠI KHI F5)
+    let allLogs = JSON.parse(localStorage.getItem('submissionLogs')) || [];
+    let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
 
     const i18n = {
         vi: {
@@ -410,7 +413,6 @@ HTML_TEMPLATE = """
 
     function toggleLanguage() {
         currentLang = currentLang === 'vi' ? 'en' : 'vi';
-        localStorage.setItem('language', currentLang);
         updateTexts();
     }
 
@@ -422,19 +424,6 @@ HTML_TEMPLATE = """
             }
         });
     }
-
-    function toggleTheme() {
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        localStorage.setItem('theme', currentTheme);
-    }
-
-    // Khởi tạo giao diện và ngôn ngữ từ localStorage ngay khi tải trang
-    document.addEventListener("DOMContentLoaded", () => {
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        updateTexts();
-        fetchProblems();
-    });
 
     function handleCodeIndent(e) {
         const textarea = e.target;
@@ -506,6 +495,11 @@ for n in range(1, 11):
         }
     }
 
+    function toggleTheme() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+    }
+
     function switchMainTab(tabKey) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -555,9 +549,6 @@ for n in range(1, 11):
         switchMainTab('list');
     }
 
-    // Tải dữ liệu code đã lưu từ bộ nhớ trình duyệt (giữ lại khi thoát trang, lưu riêng từng bài)
-    let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
-
     function goToIde(probId) {
         if (probId !== undefined) {
             currentId = probId;
@@ -581,7 +572,7 @@ for n in range(1, 11):
         }
     }
 
-    // Tự động lưu toàn bộ dữ liệu code vào localStorage ngay khi gõ phím
+    // Tự động lưu code vào localStorage khi người dùng gõ phím
     document.addEventListener("DOMContentLoaded", () => {
         const textarea = document.getElementById('code-textarea');
         if (textarea) {
@@ -590,6 +581,7 @@ for n in range(1, 11):
                 localStorage.setItem('codeStorage', JSON.stringify(codeStorage));
             });
         }
+        fetchProblems();
     });
 
     async function addNewProblem() {
@@ -713,6 +705,9 @@ for n in range(1, 11):
         });
         let data = await res.json();
 
+        const targetP = problems.find(x => x.id === currentId);
+        const problemName = targetP ? targetP.name : "Bài tập #" + currentId;
+
         if (data.verdict === "CE") {
             summary.innerText = currentLang === 'vi' ? "❌ Lỗi Biên dịch (Compilation Error):" : "❌ Compilation Error:";
             resultsContainer.innerHTML = `
@@ -723,6 +718,18 @@ for n in range(1, 11):
                     </div>
                     <div class="test-case-body" style="display:block; color:#ff7b72;"><pre>${data.message}</pre></div>
                 </div>`;
+            
+            // Lưu log biên dịch lỗi vào localStorage
+            let newLog = {
+                "time": new Date().toLocaleTimeString() + " " + new Date().toLocaleDateString(),
+                "problem": problemName,
+                "detail": "Biên dịch thất bại",
+                "status": "CE",
+                "code": code,
+                "results": []
+            };
+            allLogs.push(newLog);
+            localStorage.setItem('submissionLogs', JSON.stringify(allLogs));
             return;
         }
 
@@ -747,6 +754,18 @@ for n in range(1, 11):
             `;
             resultsContainer.appendChild(card);
         });
+
+        // LƯU LỊCH SỬ THÀNH CÔNG VÀO LOCALSTORAGE ĐỂ KHÔNG MẤT KHI F5
+        let successLog = {
+            "time": new Date().toLocaleTimeString() + " " + new Date().toLocaleDateString(),
+            "problem": problemName,
+            "detail": `Vượt qua ${data.passed}/${data.total} test cases`,
+            "status": data.overall,
+            "code": code,
+            "results": data.results
+        };
+        allLogs.push(successLog);
+        localStorage.setItem('submissionLogs', JSON.stringify(allLogs));
     }
 
     function toggleTestDetail(headerElem) {
@@ -755,10 +774,11 @@ for n in range(1, 11):
     }
 
     async function loadAdminLogs() {
-        let res = await fetch('/admin/logs');
-        allLogs = await res.json();
+        // Lấy lại từ localStorage mỗi khi mở tab lịch sử
+        allLogs = JSON.parse(localStorage.getItem('submissionLogs')) || [];
         let tbody = document.getElementById("admin-log-body");
         tbody.innerHTML = "";
+        
         if (allLogs.length === 0) {
             tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${currentLang === 'vi' ? 'Chưa có dữ liệu.' : 'No data available.'}</td></tr>`;
             document.getElementById("submission-detail-container").style.display = "none";
@@ -922,14 +942,6 @@ def submit():
 
         compile_res = subprocess.run(["g++", src_path, "-o", exe_path], capture_output=True, text=True)
         if compile_res.returncode != 0:
-            global_submissions.append({
-                "time": datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
-                "problem": target_problem["name"],
-                "detail": "Biên dịch thất bại",
-                "status": "CE",
-                "code": code,
-                "results": []
-            })
             return jsonify({"verdict": "CE", "message": compile_res.stderr})
 
         tests = target_problem["tests"]
@@ -968,15 +980,6 @@ def submit():
                 "expected": test["expected"],
                 "output": output
             })
-
-        global_submissions.append({
-            "time": datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
-            "problem": target_problem["name"],
-            "detail": f"Vượt qua {passed_count}/{len(tests)} test cases",
-            "status": overall_status,
-            "code": code,
-            "results": results
-        })
 
         return jsonify({
             "verdict": "OK",
