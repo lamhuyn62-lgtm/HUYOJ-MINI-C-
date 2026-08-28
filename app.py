@@ -546,7 +546,8 @@ for n in range(1, 11):
     }
 
     // 1. Khai báo bộ nhớ đệm lưu code riêng theo ID bài tập (đặt ngoài hàm)
-let codeStorage = {};
+// Tải dữ liệu code đã lưu từ bộ nhớ trình duyệt (giữ lại khi thoát trang)
+let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
 
 function goToIde(probId) {
     // Nếu có truyền vào ID mới thì cập nhật currentId
@@ -565,14 +566,24 @@ function goToIde(probId) {
 
     const textarea = document.getElementById('code-textarea');
     
-    // 2. Nạp code riêng của bài hiện tại từ kho lưu trữ
+    // Nạp code riêng của bài hiện tại
     if (codeStorage[currentId] !== undefined) {
         textarea.value = codeStorage[currentId];
     } else {
-        // Nếu bài này chưa có code thì hiển thị khung mặc định
         textarea.value = `#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}`;
     }
 }
+
+// Tự động lưu toàn bộ dữ liệu vào localStorage ngay khi gõ phím
+document.addEventListener("DOMContentLoaded", () => {
+    const textarea = document.getElementById('code-textarea');
+    if (textarea) {
+        textarea.addEventListener('input', () => {
+            codeStorage[currentId] = textarea.value;
+            localStorage.setItem('codeStorage', JSON.stringify(codeStorage));
+        });
+    }
+});
 
 // 3. Tự động lưu lại code vào kho mỗi khi người dùng gõ phím
 document.addEventListener("DOMContentLoaded", () => {
