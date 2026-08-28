@@ -75,10 +75,10 @@ problems_db = [
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html lang="vi" data-theme="dark">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>HuyOJ - Quản Lý & Chấm Bài C++</title>
+    <title>HuyOJ - Online Judge Mini </title>
     <style>
         :root {
             --bg-color: #1e1e1e; --panel-bg: #252526; --text-color: #d4d4d4;
@@ -315,15 +315,21 @@ HTML_TEMPLATE = """
 </div>
 
 <script>
-    let currentTheme = 'dark';
-    let currentLang = 'vi';
-    let currentId = 1;
-    let problems = [];
+    // Khôi phục giao diện (Sáng/Tối) đã lưu, mặc định là 'dark'
+let currentTheme = localStorage.getItem('siteTheme') || 'dark';
+document.documentElement.setAttribute('data-theme', currentTheme);
 
-    // LẤY DỮ LIỆU LỊCH SỬ VÀ CODE ĐÃ LƯU TRỮ TỪ BỘ NHỚ TRÌNH DUYỆT (GIỮ LẠI KHI F5)
-    let allLogs = JSON.parse(localStorage.getItem('submissionLogs')) || [];
-    let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
+// Khôi phục ngôn ngữ đã chọn, mặc định là 'vi'
+let currentLang = localStorage.getItem('siteLang') || 'vi';
 
+// Khôi phục bài tập đang chọn, mặc định là 1
+let currentId = parseInt(localStorage.getItem('currentId')) || 1;
+
+let problems = [];
+
+// Lấy dữ liệu lịch sử và code từ localStorage
+let allLogs = JSON.parse(localStorage.getItem('submissionLogs')) || [];
+let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
     const i18n = {
         vi: {
             sysTitle: "Hệ Thống Chấm Bài C++",
@@ -333,7 +339,7 @@ HTML_TEMPLATE = """
             tabHistory: "Lịch sử Chấm",
             themeBtn: "Sáng/Tối",
             loading: "Đang tải dữ liệu...",
-            selectProbPrompt: "Chọn một bài tập bên trái",
+            selectProbPrompt: "Luyện Tập ",
             selectProbDesc: "Vui lòng chọn bài tập để xem đề bài chi tiết, input/output mẫu.",
             sampleInTitle: "Ví dụ Input mẫu:",
             sampleOutTitle: "Ví dụ Output mẫu:",
