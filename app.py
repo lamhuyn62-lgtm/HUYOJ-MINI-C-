@@ -315,19 +315,13 @@ HTML_TEMPLATE = """
 </div>
 
 <script>
-    // Khôi phục giao diện (Sáng/Tối) đã lưu, mặc định là 'dark'
 let currentTheme = localStorage.getItem('siteTheme') || 'dark';
 document.documentElement.setAttribute('data-theme', currentTheme);
 
-// Khôi phục ngôn ngữ đã chọn, mặc định là 'vi'
 let currentLang = localStorage.getItem('siteLang') || 'vi';
-
-// Khôi phục bài tập đang chọn, mặc định là 1
 let currentId = parseInt(localStorage.getItem('currentId')) || 1;
-
 let problems = [];
 
-// Lấy dữ liệu lịch sử và code từ localStorage
 let allLogs = JSON.parse(localStorage.getItem('submissionLogs')) || [];
 let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
     const i18n = {
@@ -417,10 +411,11 @@ let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
         }
     };
 
-    function toggleLanguage() {
-        currentLang = currentLang === 'vi' ? 'en' : 'vi';
-        updateTexts();
-    }
+   function toggleLanguage() {
+    currentLang = currentLang === 'vi' ? 'en' : 'vi';
+    localStorage.setItem('siteLang', currentLang);
+    updateTexts();
+}
 
     function updateTexts() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -506,9 +501,11 @@ for n in range(1, 11):
         document.documentElement.setAttribute('data-theme', currentTheme);
     }
 
-    function switchMainTab(tabKey) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('siteTheme', currentTheme);
+   }
         
         if (tabKey === 'list') {
             document.getElementById('content-list').classList.add('active');
@@ -578,15 +575,18 @@ for n in range(1, 11):
         }
     }
 
-    // Tự động lưu code vào localStorage khi người dùng gõ phím
-    document.addEventListener("DOMContentLoaded", () => {
-        const textarea = document.getElementById('code-textarea');
-        if (textarea) {
-            textarea.addEventListener('input', () => {
-                codeStorage[currentId] = textarea.value;
-                localStorage.setItem('codeStorage', JSON.stringify(codeStorage));
-            });
-        }
+document.addEventListener("DOMContentLoaded", () => {
+    updateTexts(); // Tự động dịch lại ngôn ngữ khi F5
+
+    const textarea = document.getElementById('code-textarea');
+    if (textarea) {
+        textarea.addEventListener('input', () => {
+            codeStorage[currentId] = textarea.value;
+            localStorage.setItem('codeStorage', JSON.stringify(codeStorage));
+        });
+    }
+    fetchProblems();
+});
         fetchProblems();
     });
 
