@@ -192,7 +192,7 @@ HTML_TEMPLATE = """
                     <span id="ide-prob-title" style="margin-left: 15px; font-weight: bold; color: #4ec9b0; font-size: 15px;"></span>
                 </div>
                 <div>
-                    <button class="submit-btn" style="margin-top: 10px;" onclick="goToIde(currentId)">✍️ Viết code giải bài này</button>
+                    <button class="submit-btn" onclick="submitCode()"><span data-i18n="submitBtn">Nộp bài C++</span></button>
                 </div>
             </div>
             
@@ -314,8 +314,9 @@ HTML_TEMPLATE = """
 </div>
 
 <script>
-    let currentTheme = 'dark';
-    let currentLang = 'vi';
+    // Mặc định luôn là 'light' (Sáng) và 'vi' (Tiếng Việt) và khôi phục từ localStorage nếu có
+    let currentTheme = localStorage.getItem('theme') || 'light';
+    let currentLang = localStorage.getItem('language') || 'vi';
     let currentId = 1;
     let problems = [];
     let allLogs = [];
@@ -409,6 +410,7 @@ HTML_TEMPLATE = """
 
     function toggleLanguage() {
         currentLang = currentLang === 'vi' ? 'en' : 'vi';
+        localStorage.setItem('language', currentLang);
         updateTexts();
     }
 
@@ -420,6 +422,19 @@ HTML_TEMPLATE = """
             }
         });
     }
+
+    function toggleTheme() {
+        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        localStorage.setItem('theme', currentTheme);
+    }
+
+    // Khởi tạo giao diện và ngôn ngữ từ localStorage ngay khi tải trang
+    document.addEventListener("DOMContentLoaded", () => {
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateTexts();
+        fetchProblems();
+    });
 
     function handleCodeIndent(e) {
         const textarea = e.target;
@@ -491,11 +506,6 @@ for n in range(1, 11):
         }
     }
 
-    function toggleTheme() {
-        currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-    }
-
     function switchMainTab(tabKey) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -545,55 +555,42 @@ for n in range(1, 11):
         switchMainTab('list');
     }
 
-    // 1. Khai báo bộ nhớ đệm lưu code riêng theo ID bài tập (đặt ngoài hàm)
-// Tải dữ liệu code đã lưu từ bộ nhớ trình duyệt (giữ lại khi thoát trang)
-let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
+    // Tải dữ liệu code đã lưu từ bộ nhớ trình duyệt (giữ lại khi thoát trang, lưu riêng từng bài)
+    let codeStorage = JSON.parse(localStorage.getItem('codeStorage')) || {};
 
-function goToIde(probId) {
-    // Nếu có truyền vào ID mới thì cập nhật currentId
-    if (probId !== undefined) {
-        currentId = probId;
+    function goToIde(probId) {
+        if (probId !== undefined) {
+            currentId = probId;
+        }
+        
+        const p = problems.find(x => x.id === currentId);
+        if (!p) return;
+
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.getElementById('content-ide').classList.add('active');
+        document.getElementById('ide-prob-title').innerHTML = p.name;
+        document.getElementById('summary').innerText = "";
+        document.getElementById('test-results-list').innerHTML = "";
+
+        const textarea = document.getElementById('code-textarea');
+        
+        if (codeStorage[currentId] !== undefined) {
+            textarea.value = codeStorage[currentId];
+        } else {
+            textarea.value = `#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}`;
+        }
     }
-    
-    const p = problems.find(x => x.id === currentId);
-    if (!p) return;
 
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.getElementById('content-ide').classList.add('active');
-    document.getElementById('ide-prob-title').innerHTML = p.name;
-    document.getElementById('summary').innerText = "";
-    document.getElementById('test-results-list').innerHTML = "";
-
-    const textarea = document.getElementById('code-textarea');
-    
-    // Nạp code riêng của bài hiện tại
-    if (codeStorage[currentId] !== undefined) {
-        textarea.value = codeStorage[currentId];
-    } else {
-        textarea.value = `#include <iostream>\nusing namespace std;\n\nint main() {\n    \n    return 0;\n}`;
-    }
-}
-
-// Tự động lưu toàn bộ dữ liệu vào localStorage ngay khi gõ phím
-document.addEventListener("DOMContentLoaded", () => {
-    const textarea = document.getElementById('code-textarea');
-    if (textarea) {
-        textarea.addEventListener('input', () => {
-            codeStorage[currentId] = textarea.value;
-            localStorage.setItem('codeStorage', JSON.stringify(codeStorage));
-        });
-    }
-});
-
-// 3. Tự động lưu lại code vào kho mỗi khi người dùng gõ phím
-document.addEventListener("DOMContentLoaded", () => {
-    const textarea = document.getElementById('code-textarea');
-    if (textarea) {
-        textarea.addEventListener('input', () => {
-            codeStorage[currentId] = textarea.value;
-        });
-    }
-});
+    // Tự động lưu toàn bộ dữ liệu code vào localStorage ngay khi gõ phím
+    document.addEventListener("DOMContentLoaded", () => {
+        const textarea = document.getElementById('code-textarea');
+        if (textarea) {
+            textarea.addEventListener('input', () => {
+                codeStorage[currentId] = textarea.value;
+                localStorage.setItem('codeStorage', JSON.stringify(codeStorage));
+            });
+        }
+    });
 
     async function addNewProblem() {
         let name = document.getElementById('new-name').value.trim();
@@ -768,7 +765,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
-        // Đảo ngược để hiển thị lần nộp mới nhất lên đầu
         let reversedLogs = [...allLogs].reverse();
         reversedLogs.forEach((log, idx) => {
             let originalIndex = allLogs.length - 1 - idx;
@@ -780,7 +776,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Tách biệt lịch sử bài nào ra bài nấy, khi bấm vào hiện đúng code và test case của bài đó
     function viewSubmissionDetail(index) {
         let log = allLogs[index];
         if (!log) return;
@@ -816,11 +811,8 @@ document.addEventListener("DOMContentLoaded", () => {
             container.appendChild(card);
         });
 
-        // Cuộn xuống phần chi tiết để người dùng dễ nhìn
         document.getElementById("submission-detail-container").scrollIntoView({ behavior: 'smooth' });
     }
-
-    window.onload = fetchProblems;
 </script>
 </body>
 </html>
@@ -977,7 +969,6 @@ def submit():
                 "output": output
             })
 
-        # Lưu lại lịch sử kèm theo mã nguồn và kết quả riêng của bài nộp này
         global_submissions.append({
             "time": datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
             "problem": target_problem["name"],
