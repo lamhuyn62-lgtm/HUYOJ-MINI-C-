@@ -88,10 +88,10 @@ HTML_TEMPLATE = """
         }
         body { font-family: sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 15px; }
         .container { max-width: 1400px; margin: auto; background: var(--panel-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
         h1 { color: #4ec9b0; margin: 0; font-size: 22px; cursor: pointer; }
-        .nav-tabs, .controls { display: flex; gap: 10px; align-items: center; }
-        .tab-btn, .ctrl-btn { background: var(--header-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .nav-tabs, .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .tab-btn, .ctrl-btn { background: var(--header-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px; }
         .tab-btn.active, .ctrl-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
@@ -140,20 +140,24 @@ HTML_TEMPLATE = """
         .form-control { width: 100%; padding: 8px 12px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px; box-sizing: border-box; font-size: 13px; }
         
         .generator-box { background: var(--header-bg); border: 1px solid var(--border-color); padding: 12px; border-radius: 6px; margin-bottom: 15px; }
+        .clickable-row { cursor: pointer; }
+        .clickable-row:hover { background: var(--hover-bg); }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1 onclick="goHome()">⚡ HuyOJ - Hệ Thống Chấm Bài C++</h1>
+        <h1 onclick="goHome()">⚡ HuyOJ - <span data-i18n="sysTitle">Hệ Thống Chấm Bài C++</span></h1>
         <div class="nav-tabs">
-            <button class="tab-btn active" id="btn-tab-list" onclick="switchMainTab('list')">📚 Danh sách bài tập</button>
-            <button class="tab-btn" id="btn-tab-admin-add" onclick="switchMainTab('admin-add')">➕ Thêm bài tập</button>
-            <button class="tab-btn" id="btn-tab-admin-manage" onclick="switchMainTab('admin-manage')">⚙️ Quản lý & Sửa bài</button>
-            <button class="tab-btn" id="btn-tab-admin" onclick="switchMainTab('admin')">🛡️ Lịch sử Chấm</button>
+            <button class="tab-btn active" id="btn-tab-list" onclick="switchMainTab('list')">📚 <span data-i18n="tabList">Danh sách bài tập</span></button>
+            <button class="tab-btn" id="btn-tab-admin-add" onclick="switchMainTab('admin-add')">➕ <span data-i18n="tabAdd">Thêm bài tập</span></button>
+            <button class="tab-btn" id="btn-tab-admin-manage" onclick="switchMainTab('admin-manage')">⚙️ <span data-i18n="tabManage">Quản lý & Sửa bài</span></button>
+            <button class="tab-btn" id="btn-tab-admin" onclick="switchMainTab('admin')">🛡️ <span data-i18n="tabHistory">Lịch sử Chấm</span></button>
         </div>
+        <!-- Đã tách ra 4 nút điều khiển riêng biệt -->
         <div class="controls">
-            <button class="ctrl-btn" onclick="toggleTheme()">☀️ Sáng / Tối</button>
+            <button class="ctrl-btn" id="btn-lang" onclick="toggleLanguage()">🌐 VN / EN</button>
+            <button class="ctrl-btn" id="btn-theme" onclick="toggleTheme()">☀️ <span data-i18n="themeBtn">Sáng/Tối</span></button>
         </div>
     </div>
 
@@ -161,18 +165,18 @@ HTML_TEMPLATE = """
     <div id="content-list" class="tab-content active">
         <div class="layout-prob">
             <div class="sidebar-prob" id="prob-sidebar">
-                <h3 style='margin-top:0; font-size:14px;'>Đang tải dữ liệu...</h3>
+                <h3 style='margin-top:0; font-size:14px;' data-i18n="loading">Đang tải dữ liệu...</h3>
             </div>
             <div class="main-prob">
                 <div class="problem-card" id="problem-detail-card">
-                    <h2 id="d-title" style="margin-top:0; color:#4ec9b0;">Chọn một bài tập bên trái</h2>
-                    <div id="d-desc">Vui lòng chọn bài tập để xem đề bài chi tiết, input/output mẫu.</div>
+                    <h2 id="d-title" style="margin-top:0; color:#4ec9b0;" data-i18n="selectProbPrompt">Chọn một bài tập bên trái</h2>
+                    <div id="d-desc" data-i18n="selectProbDesc">Vui lòng chọn bài tập để xem đề bài chi tiết, input/output mẫu.</div>
                     <div id="d-io-section" style="display:none;">
-                        <h4>Ví dụ Input mẫu:</h4>
+                        <h4 data-i18n="sampleInTitle">Ví dụ Input mẫu:</h4>
                         <div class="io-box" id="d-sample-in"></div>
-                        <h4>Ví dụ Output mẫu:</h4>
+                        <h4 data-i18n="sampleOutTitle">Ví dụ Output mẫu:</h4>
                         <div class="io-box" id="d-sample-out"></div>
-                        <button class="submit-btn" style="margin-top: 10px;" onclick="goToIde()">✍️ Viết code giải bài này</button>
+                        <button class="submit-btn" style="margin-top: 10px;" onclick="goToIde()">✍️ <span data-i18n="writeCodeBtn">Viết code giải bài này</span></button>
                     </div>
                 </div>
             </div>
@@ -184,11 +188,11 @@ HTML_TEMPLATE = """
         <div class="ide-layout">
             <div class="ide-top-bar">
                 <div>
-                    <button class="ctrl-btn" onclick="goHome()">⬅ Quay lại danh sách</button>
+                    <button class="ctrl-btn" onclick="goHome()">⬅ <span data-i18n="backBtn">Quay lại danh sách</span></button>
                     <span id="ide-prob-title" style="margin-left: 15px; font-weight: bold; color: #4ec9b0; font-size: 15px;"></span>
                 </div>
                 <div>
-                    <button class="submit-btn" onclick="submitCode()">🚀 Nộp bài C++</button>
+                    <button class="submit-btn" onclick="submitCode()">🚀 <span data-i18n="submitBtn">Nộp bài C++</span></button>
                 </div>
             </div>
             
@@ -200,76 +204,76 @@ HTML_TEMPLATE = """
 
     <!-- TAB 3: THÊM BÀI TẬP -->
     <div id="content-admin-add" class="tab-content">
-        <h2 style="color: #4ec9b0; margin-top: 0;">🛠️ Thêm bài tập mới (Dành cho mọi người)</h2>
+        <h2 style="color: #4ec9b0; margin-top: 0;" data-i18n="addTitle">🛠️ Thêm bài tập mới (Dành cho mọi người)</h2>
         <div class="problem-card" style="max-width: 850px;">
             <div class="form-group">
-                <label>Tên bài tập:</label>
-                <input type="text" id="new-name" class="form-control" placeholder="Ví dụ: 11. <b>In lời chào</b>">
+                <label data-i18n="lblName">Tên bài tập:</label>
+                <input type="text" id="new-name" class="form-control" placeholder="Ví dụ: 11. In lời chào">
             </div>
             <div class="form-group">
-                <label>Mô tả đề bài:</label>
-                <textarea id="new-desc" class="form-control" rows="4" placeholder="Nhập vào tên. In ra <b>Xin chào</b> kèm theo tên."></textarea>
+                <label data-i18n="lblDesc">Mô tả đề bài:</label>
+                <textarea id="new-desc" class="form-control" rows="4" placeholder="Nhập vào tên. In ra Xin chào kèm theo tên."></textarea>
             </div>
             <div style="display: flex; gap: 15px;">
                 <div class="form-group" style="flex: 1;">
-                    <label>Input mẫu (Sample In):</label>
+                    <label data-i18n="lblSampleIn">Input mẫu (Sample In):</label>
                     <input type="text" id="new-sample-in" class="form-control" placeholder="Huy">
                 </div>
                 <div class="form-group" style="flex: 1;">
-                    <label>Output mẫu (Sample Out):</label>
+                    <label data-i18n="lblSampleOut">Output mẫu (Sample Out):</label>
                     <input type="text" id="new-sample-out" class="form-control" placeholder="Xin chào Huy">
                 </div>
             </div>
 
             <div class="generator-box">
-                <label style="color: #4ec9b0; font-weight: bold; font-size: 14px; margin-bottom: 8px; display:block;">🪄 Trợ lý tạo Test Cases tự động:</label>
+                <label style="color: #4ec9b0; font-weight: bold; font-size: 14px; margin-bottom: 8px; display:block;" data-i18n="lblGenTitle">🪄 Trợ lý tạo Test Cases tự động:</label>
                 <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
-                    <button type="button" class="ctrl-btn" onclick="autoFillGreetingTemplate()">👉 Mẫu: In chuỗi cố định</button>
-                    <button type="button" class="ctrl-btn" onclick="autoFillSumTemplate()">👉 Mẫu: Tính tổng 1 đến N</button>
+                    <button type="button" class="ctrl-btn" onclick="autoFillGreetingTemplate()" data-i18n="btnGen1">👉 Mẫu: In chuỗi cố định</button>
+                    <button type="button" class="ctrl-btn" onclick="autoFillSumTemplate()" data-i18n="btnGen2">👉 Mẫu: Tính tổng 1 đến N</button>
                 </div>
-                <textarea id="new-generator" class="form-control" rows="4" placeholder="tests = [{'input': 'Huy\n', 'expected': 'Xin chào Huy\n'}]"></textarea>
+                <textarea id="new-generator" class="form-control" rows="4" placeholder="tests = [{'input': 'Huy\\n', 'expected': 'Xin chào Huy\\n'}]"></textarea>
             </div>
 
-            <button class="submit-btn" onclick="addNewProblem()">✨ Tạo bài tập mới</button>
+            <button class="submit-btn" onclick="addNewProblem()" data-i18n="btnCreate">✨ Tạo bài tập mới</button>
             <div id="add-status" style="margin-top: 10px; font-weight: bold;"></div>
         </div>
     </div>
 
     <!-- TAB 4: QUẢN LÝ & SỬA BÀI TẬP -->
     <div id="content-admin-manage" class="tab-content">
-        <h2 style="color: #4ec9b0; margin-top: 0;">⚙️ Quản lý, Chỉnh sửa bài tập & Test Cases</h2>
-        <div style="display: flex; gap: 20px;">
-            <div style="width: 300px;">
-                <label style="font-weight: bold; color: #4ec9b0; display:block; margin-bottom:5px;">Chọn bài cần sửa:</label>
+        <h2 style="color: #4ec9b0; margin-top: 0;" data-i18n="manageTitle">⚙️ Quản lý, Chỉnh sửa bài tập & Test Cases</h2>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div style="width: 300px; min-width: 250px;">
+                <label style="font-weight: bold; color: #4ec9b0; display:block; margin-bottom:5px;" data-i18n="lblSelectEdit">Chọn bài cần sửa:</label>
                 <select id="manage-select-prob" class="form-control" size="15" onchange="loadProblemForEdit()" style="height: 400px; font-family: monospace;"></select>
             </div>
-            <div style="flex: 1;" class="problem-card" id="edit-form-container">
+            <div style="flex: 1; min-width: 300px;" class="problem-card" id="edit-form-container">
                 <input type="hidden" id="edit-id">
                 <div class="form-group">
-                    <label>Tên bài tập:</label>
+                    <label data-i18n="lblName">Tên bài tập:</label>
                     <input type="text" id="edit-name" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label>Mô tả đề bài:</label>
+                    <label data-i18n="lblDesc">Mô tả đề bài:</label>
                     <textarea id="edit-desc" class="form-control" rows="3"></textarea>
                 </div>
                 <div style="display: flex; gap: 15px;">
                     <div class="form-group" style="flex: 1;">
-                        <label>Input mẫu:</label>
+                        <label data-i18n="lblSampleIn">Input mẫu:</label>
                         <input type="text" id="edit-sample-in" class="form-control">
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label>Output mẫu:</label>
+                        <label data-i18n="lblSampleOut">Output mẫu:</label>
                         <input type="text" id="edit-sample-out" class="form-control">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Bộ Test Cases hiện tại (JSON):</label>
+                    <label data-i18n="lblTestsJSON">Bộ Test Cases hiện tại (JSON):</label>
                     <textarea id="edit-tests" class="form-control" rows="6" style="font-family: monospace; font-size: 12px;"></textarea>
                 </div>
                 <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button class="submit-btn" onclick="updateProblem()">💾 Lưu thay đổi</button>
-                    <button class="danger-btn" onclick="deleteProblem()">🗑️ Xóa bài tập này</button>
+                    <button class="submit-btn" onclick="updateProblem()" data-i18n="btnSave">💾 Lưu thay đổi</button>
+                    <button class="danger-btn" onclick="deleteProblem()" data-i18n="btnDelete">🗑️ Xóa bài tập này</button>
                 </div>
                 <div id="edit-status" style="margin-top: 10px; font-weight: bold;"></div>
             </div>
@@ -278,23 +282,144 @@ HTML_TEMPLATE = """
 
     <!-- TAB 5: LỊCH SỬ CHẤM BÀI -->
     <div id="content-admin" class="tab-content">
-        <h2 style="color: #dcdcaa; margin-top: 0;">Lịch sử nộp bài toàn hệ thống</h2>
-        <button class="ctrl-btn" onclick="loadAdminLogs()" style="margin-bottom: 10px;">🔄 Làm mới</button>
+        <h2 style="color: #dcdcaa; margin-top: 0;" data-i18n="historyTitle">Lịch sử nộp bài toàn hệ thống</h2>
+        <p style="font-size: 13px; color: var(--text-color); opacity: 0.8;" data-i18n="historySub">💡 Bấm vào một dòng trong bảng để xem chi tiết code và các test case của lần nộp đó.</p>
+        <button class="ctrl-btn" onclick="loadAdminLogs()" style="margin-bottom: 10px;">🔄 <span data-i18n="btnRefresh">Làm mới</span></button>
         <table>
             <thead>
-                <tr><th>STT</th><th>Thời gian</th><th>Bài tập</th><th>Chi tiết</th><th>Trạng thái</th></tr>
+                <tr>
+                    <th data-i18n="thNo">STT</th>
+                    <th data-i18n="thTime">Thời gian</th>
+                    <th data-i18n="thProblem">Bài tập</th>
+                    <th data-i18n="thDetail">Chi tiết</th>
+                    <th data-i18n="thStatus">Trạng thái</th>
+                </tr>
             </thead>
             <tbody id="admin-log-body">
-                <tr><td colspan="5" style="text-align: center;">Chưa có dữ liệu.</td></tr>
+                <tr><td colspan="5" style="text-align: center;" data-i18n="noData">Chưa có dữ liệu.</td></tr>
             </tbody>
         </table>
+
+        <!-- Khung xem chi tiết bài nộp trong Lịch sử (Bài nào ra bài nấy, độc lập hoàn toàn) -->
+        <div id="submission-detail-container" style="margin-top: 25px; display: none;" class="problem-card">
+            <h3 style="color: #4ec9b0; margin-top: 0;" data-i18n="subDetailHeader">📄 Chi tiết bài nộp đã chọn</h3>
+            <div class="form-group">
+                <label data-i18n="subDetailCode">Mã nguồn C++ đã nộp:</label>
+                <textarea id="log-view-code" class="code-editor" style="height: 250px; background: var(--bg-color);" readonly></textarea>
+            </div>
+            <h4 data-i18n="subDetailTests">Kết quả các Test Cases trong lần nộp này:</h4>
+            <div id="log-view-tests" class="test-results-container"></div>
+        </div>
     </div>
 </div>
 
 <script>
     let currentTheme = 'dark';
+    let currentLang = 'vi';
     let currentId = 1;
     let problems = [];
+    let allLogs = [];
+
+    const i18n = {
+        vi: {
+            sysTitle: "Hệ Thống Chấm Bài C++",
+            tabList: "Danh sách bài tập",
+            tabAdd: "Thêm bài tập",
+            tabManage: "Quản lý & Sửa bài",
+            tabHistory: "Lịch sử Chấm",
+            themeBtn: "Sáng/Tối",
+            loading: "Đang tải dữ liệu...",
+            selectProbPrompt: "Chọn một bài tập bên trái",
+            selectProbDesc: "Vui lòng chọn bài tập để xem đề bài chi tiết, input/output mẫu.",
+            sampleInTitle: "Ví dụ Input mẫu:",
+            sampleOutTitle: "Ví dụ Output mẫu:",
+            writeCodeBtn: "Viết code giải bài này",
+            backBtn: "Quay lại danh sách",
+            submitBtn: "Nộp bài C++",
+            addTitle: "🛠️ Thêm bài tập mới (Dành cho mọi người)",
+            lblName: "Tên bài tập:",
+            lblDesc: "Mô tả đề bài:",
+            lblSampleIn: "Input mẫu (Sample In):",
+            lblSampleOut: "Output mẫu (Sample Out):",
+            lblGenTitle: "🪄 Trợ lý tạo Test Cases tự động:",
+            btnGen1: "👉 Mẫu: In chuỗi cố định",
+            btnGen2: "👉 Mẫu: Tính tổng 1 đến N",
+            btnCreate: "✨ Tạo bài tập mới",
+            manageTitle: "⚙️ Quản lý, Chỉnh sửa bài tập & Test Cases",
+            lblSelectEdit: "Chọn bài cần sửa:",
+            lblTestsJSON: "Bộ Test Cases hiện tại (JSON):",
+            btnSave: "💾 Lưu thay đổi",
+            btnDelete: "🗑️ Xóa bài tập này",
+            historyTitle: "Lịch sử nộp bài toàn hệ thống",
+            historySub: "💡 Bấm vào một dòng trong bảng để xem chi tiết code và các test case của lần nộp đó.",
+            btnRefresh: "Làm mới",
+            thNo: "STT",
+            thTime: "Thời gian",
+            thProblem: "Bài tập",
+            thDetail: "Chi tiết",
+            thStatus: "Trạng thái",
+            noData: "Chưa có dữ liệu.",
+            subDetailHeader: "📄 Chi tiết bài nộp đã chọn",
+            subDetailCode: "Mã nguồn C++ đã nộp:",
+            subDetailTests: "Kết quả các Test Cases trong lần nộp này:"
+        },
+        en: {
+            sysTitle: "C++ Online Judge System",
+            tabList: "Problem List",
+            tabAdd: "Add Problem",
+            tabManage: "Manage Problems",
+            tabHistory: "Submission History",
+            themeBtn: "Light/Dark",
+            loading: "Loading data...",
+            selectProbPrompt: "Select a problem from the left",
+            selectProbDesc: "Please choose a problem to view detailed description and sample I/O.",
+            sampleInTitle: "Sample Input:",
+            sampleOutTitle: "Sample Output:",
+            writeCodeBtn: "Write code to solve this",
+            backBtn: "Back to list",
+            submitBtn: "Submit C++ Code",
+            addTitle: "🛠️ Add New Problem",
+            lblName: "Problem Name:",
+            lblDesc: "Description:",
+            lblSampleIn: "Sample Input:",
+            lblSampleOut: "Sample Output:",
+            lblGenTitle: "🪄 Test Case Generator Assistant:",
+            btnGen1: "👉 Template: Print fixed string",
+            btnGen2: "👉 Template: Sum 1 to N",
+            btnCreate: "✨ Create Problem",
+            manageTitle: "⚙️ Manage & Edit Problems & Test Cases",
+            lblSelectEdit: "Select problem to edit:",
+            lblTestsJSON: "Current Test Cases (JSON):",
+            btnSave: "💾 Save Changes",
+            btnDelete: "🗑️ Delete Problem",
+            historyTitle: "System Submission History",
+            historySub: "💡 Click any row in the table to view the exact code and test cases for that submission.",
+            btnRefresh: "Refresh",
+            thNo: "No.",
+            thTime: "Time",
+            thProblem: "Problem",
+            thDetail: "Detail",
+            thStatus: "Status",
+            noData: "No data available.",
+            subDetailHeader: "📄 Selected Submission Details",
+            subDetailCode: "Submitted C++ Code:",
+            subDetailTests: "Test Cases Result for this Submission:"
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'vi' ? 'en' : 'vi';
+        updateTexts();
+    }
+
+    function updateTexts() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (i18n[currentLang][key]) {
+                el.innerText = i18n[currentLang][key];
+            }
+        });
+    }
 
     function handleCodeIndent(e) {
         const textarea = e.target;
@@ -362,7 +487,7 @@ for n in range(1, 11):
             loadProblemDetail();
         } catch(e) {
             console.error(e);
-            document.getElementById("prob-sidebar").innerHTML = "<h3 style='color:#da3633; margin-top:0;'>❌ Lỗi tải bài tập.<br>Xem cửa sổ chạy Python.</h3>";
+            document.getElementById("prob-sidebar").innerHTML = "<h3 style='color:#da3633; margin-top:0;'>❌ Lỗi tải bài tập.</h3>";
         }
     }
 
@@ -396,7 +521,7 @@ for n in range(1, 11):
 
     function renderSidebar() {
         const sidebar = document.getElementById("prob-sidebar");
-        sidebar.innerHTML = "<h3 style='margin-top:0; font-size:14px;'>Danh sách bài tập</h3>";
+        sidebar.innerHTML = `<h3 style='margin-top:0; font-size:14px;'>${currentLang === 'vi' ? 'Danh sách bài tập' : 'Problem List'}</h3>`;
         problems.forEach(p => {
             let btn = document.createElement("button");
             btn.className = `btn-prob ${p.id === currentId ? 'active' : ''}`;
@@ -444,12 +569,12 @@ for n in range(1, 11):
 
         if (!name || !desc) {
             statusDiv.style.color = '#da3633';
-            statusDiv.innerText = "❌ Vui lòng nhập đầy đủ tên và mô tả bài tập!";
+            statusDiv.innerText = currentLang === 'vi' ? "❌ Vui lòng nhập đầy đủ tên và mô tả bài tập!" : "❌ Please enter name and description!";
             return;
         }
 
         statusDiv.style.color = '#d29922';
-        statusDiv.innerText = "⏳ Đang xử lý và sinh bộ test cases...";
+        statusDiv.innerText = currentLang === 'vi' ? "⏳ Đang xử lý và sinh bộ test cases..." : "⏳ Generating test cases...";
 
         let res = await fetch('/admin/add-problem', {
             method: 'POST',
@@ -460,11 +585,11 @@ for n in range(1, 11):
 
         if (data.status === "success") {
             statusDiv.style.color = '#238636';
-            statusDiv.innerText = `✅ Thêm bài thành công! Đã sinh ra ${data.testCount} test cases.`;
+            statusDiv.innerText = currentLang === 'vi' ? `✅ Thêm bài thành công! Đã sinh ra ${data.testCount} test cases.` : `✅ Added successfully! Generated ${data.testCount} test cases.`;
             setTimeout(() => switchMainTab('list'), 1500);
         } else {
             statusDiv.style.color = '#da3633';
-            statusDiv.innerText = `❌ Lỗi sinh test: ${data.message}`;
+            statusDiv.innerText = `❌ Lỗi: ${data.message}`;
         }
     }
 
@@ -512,7 +637,7 @@ for n in range(1, 11):
         let tests;
         try { tests = JSON.parse(testsRaw); } catch (e) {
             statusDiv.style.color = '#da3633';
-            statusDiv.innerText = "❌ Định dạng JSON của Test Cases không hợp lệ!";
+            statusDiv.innerText = currentLang === 'vi' ? "❌ Định dạng JSON của Test Cases không hợp lệ!" : "❌ Invalid JSON format for Test Cases!";
             return;
         }
 
@@ -524,7 +649,7 @@ for n in range(1, 11):
         let data = await res.json();
         if (data.status === "success") {
             statusDiv.style.color = '#238636';
-            statusDiv.innerText = "✅ Cập nhật bài tập thành công!";
+            statusDiv.innerText = currentLang === 'vi' ? "✅ Cập nhật bài tập thành công!" : "✅ Problem updated successfully!";
             loadManageList();
         } else {
             statusDiv.style.color = '#da3633';
@@ -534,10 +659,10 @@ for n in range(1, 11):
 
     async function deleteProblem() {
         let id = document.getElementById('edit-id').value;
-        if (!confirm("Bạn có chắc chắn muốn xóa bài tập này không?")) return;
+        if (!confirm(currentLang === 'vi' ? "Bạn có chắc chắn muốn xóa bài tập này không?" : "Are you sure to delete this problem?")) return;
         let res = await fetch(`/admin/delete-problem/${id}`, { method: 'DELETE' });
         let data = await res.json();
-        if (data.status === "success") { alert("Đã xóa!"); loadManageList(); }
+        if (data.status === "success") { alert("Deleted!"); loadManageList(); }
     }
 
     async function submitCode() {
@@ -545,7 +670,7 @@ for n in range(1, 11):
         const summary = document.getElementById("summary");
         const resultsContainer = document.getElementById("test-results-list");
 
-        summary.innerText = "⏳ Đang biên dịch và chấm điểm...";
+        summary.innerText = currentLang === 'vi' ? "⏳ Đang biên dịch và chấm điểm..." : "⏳ Compiling and grading...";
         resultsContainer.innerHTML = "";
 
         let res = await fetch('/submit', {
@@ -556,7 +681,7 @@ for n in range(1, 11):
         let data = await res.json();
 
         if (data.verdict === "CE") {
-            summary.innerText = "❌ Lỗi Biên dịch (Compilation Error):";
+            summary.innerText = currentLang === 'vi' ? "❌ Lỗi Biên dịch (Compilation Error):" : "❌ Compilation Error:";
             resultsContainer.innerHTML = `
                 <div class="test-case-card">
                     <div class="test-case-header" style="background:#da3633; color:white;" onclick="toggleTestDetail(this)">
@@ -568,7 +693,7 @@ for n in range(1, 11):
             return;
         }
 
-        summary.innerText = `🎯 Kết quả: Vượt qua ${data.passed}/${data.total} test cases. (${data.overall})`;
+        summary.innerText = currentLang === 'vi' ? `🎯 Kết quả: Vượt qua ${data.passed}/${data.total} test cases. (${data.overall})` : `🎯 Result: Passed ${data.passed}/${data.total} test cases. (${data.overall})`;
 
         data.results.forEach(t => {
             let card = document.createElement("div");
@@ -598,18 +723,65 @@ for n in range(1, 11):
 
     async function loadAdminLogs() {
         let res = await fetch('/admin/logs');
-        let logs = await res.json();
+        allLogs = await res.json();
         let tbody = document.getElementById("admin-log-body");
         tbody.innerHTML = "";
-        if (logs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Chưa có dữ liệu.</td></tr>`;
+        if (allLogs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${currentLang === 'vi' ? 'Chưa có dữ liệu.' : 'No data available.'}</td></tr>`;
+            document.getElementById("submission-detail-container").style.display = "none";
             return;
         }
-        logs.reverse().forEach((log, idx) => {
+        
+        // Đảo ngược để hiển thị lần nộp mới nhất lên đầu
+        let reversedLogs = [...allLogs].reverse();
+        reversedLogs.forEach((log, idx) => {
+            let originalIndex = allLogs.length - 1 - idx;
             let tr = document.createElement("tr");
-            tr.innerHTML = `<td>#${logs.length - idx}</td><td>${log.time}</td><td>${log.problem}</td><td>${log.detail}</td><td><span class="badge ${log.status}">${log.status}</span></td>`;
+            tr.className = "clickable-row";
+            tr.onclick = () => viewSubmissionDetail(originalIndex);
+            tr.innerHTML = `<td>#${allLogs.length - idx}</td><td>${log.time}</td><td>${log.problem}</td><td>${log.detail}</td><td><span class="badge ${log.status}">${log.status}</span></td>`;
             tbody.appendChild(tr);
         });
+    }
+
+    // Tách biệt lịch sử bài nào ra bài nấy, khi bấm vào hiện đúng code và test case của bài đó
+    function viewSubmissionDetail(index) {
+        let log = allLogs[index];
+        if (!log) return;
+
+        document.getElementById("submission-detail-container").style.display = "block";
+        document.getElementById("log-view-code").value = log.code || "";
+        
+        let container = document.getElementById("log-view-tests");
+        container.innerHTML = "";
+
+        if (!log.results || log.results.length === 0) {
+            container.innerHTML = `<div style="padding: 10px; font-family: monospace;">Biên dịch thất bại hoặc không có test case chi tiết.</div>`;
+            return;
+        }
+
+        log.results.forEach(t => {
+            let card = document.createElement("div");
+            card.className = "test-case-card";
+            card.innerHTML = `
+                <div class="test-case-header" onclick="toggleTestDetail(this)">
+                    <span>Test #${t.test}</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="badge ${t.status}">${t.status}</span>
+                        <span style="font-size: 11px;">▼</span>
+                    </div>
+                </div>
+                <div class="test-case-body">
+                    <strong>Input:</strong><pre style="margin:4px 0 10px 0; color:#dcdcaa; white-space: pre-wrap;">${t.input}</pre>
+                    <strong>Expected:</strong><pre style="margin:4px 0 10px 0; color:#7ee787; white-space: pre-wrap;">${t.expected}</pre>
+                    <strong>Output:</strong><pre style="margin:4px 0 0 0; color:#ff7b72; white-space: pre-wrap;">${t.output}</pre>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+        // Cuộn xuống phần chi tiết để người dùng dễ nhìn
+        document.getElementById("submission-detail-container").scrollIntoView({ behavior: 'smooth' });
     }
 
     window.onload = fetchProblems;
@@ -726,7 +898,9 @@ def submit():
                 "time": datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
                 "problem": target_problem["name"],
                 "detail": "Biên dịch thất bại",
-                "status": "CE"
+                "status": "CE",
+                "code": code,
+                "results": []
             })
             return jsonify({"verdict": "CE", "message": compile_res.stderr})
 
@@ -767,11 +941,14 @@ def submit():
                 "output": output
             })
 
+        # Lưu lại lịch sử kèm theo mã nguồn và kết quả riêng của bài nộp này
         global_submissions.append({
             "time": datetime.now().strftime("%H:%M:%S %d/%m/%Y"),
             "problem": target_problem["name"],
             "detail": f"Vượt qua {passed_count}/{len(tests)} test cases",
-            "status": overall_status
+            "status": overall_status,
+            "code": code,
+            "results": results
         })
 
         return jsonify({
